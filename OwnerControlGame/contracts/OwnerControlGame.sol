@@ -78,12 +78,6 @@ contract OwnerControlGame{
         emit OwnerChanged(oldOwner, msg.sender, block.timestamp);
     }
 
-     // Write a function that allows:
-    // - Previous owners should be able to withdraw their ETH - Done
-    // - Current owner should not even be able to call this function  - Done
-    // - Once withdrawan, the contract's value should decrease as well - Done
-    // - Once withdrawan, mark the User/caller as NOT REGISTERED. - Done
-
     function withdraw() external payable{
         require(msg.sender != owner, "Owner can't withdraw funds");
         require(userRecords[msg.sender].isRegistered, "User Not registered");
