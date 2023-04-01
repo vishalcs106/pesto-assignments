@@ -81,6 +81,7 @@ contract OwnerControlGame{
     function withdraw() external payable{
         require(msg.sender != owner, "Owner can't withdraw funds");
         require(userRecords[msg.sender].isRegistered, "User Not registered");
+        require(userRecords[msg.sender].balance > 0, "Was not a owner prevoiusly")
         require(address(this).balance > userRecords[msg.sender].balance, "Insufficient Balance");
         uint256 balance = userRecords[msg.sender].balance;
         payable(msg.sender).transfer(balance);
