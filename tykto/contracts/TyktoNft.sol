@@ -58,7 +58,6 @@ contract TyktoNft is ERC721, ERC721URIStorage, ERC2981, Pausable, Ownable, ERC72
 
     function safeMint(address to, string memory uri)
         public
-        onlyOwner
         payable
     {
         require(msg.value >= mintPrice, "Not enough ETH sent; check price!");

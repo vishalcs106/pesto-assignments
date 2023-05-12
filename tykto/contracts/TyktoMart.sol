@@ -47,13 +47,13 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         _unpause();
     }
 
-    function setFeePercentage(uint256 _feePercentage) external onlyOwner {
+    function setFeePercentage(uint256 _feePercentage) external whenNotPaused onlyOwner {
         require(_feePercentage <= 100, "Fee percentage cannot be more than 100");
         feePercentage = _feePercentage;
     }
 
 
-    function listForSale(address ticketAddress, uint256 tokenId, uint256 amount, uint256 saleDuration) public payable {
+    function listForSale(address ticketAddress, uint256 tokenId, uint256 amount, uint256 saleDuration) public whenNotPaused payable {
         require(msg.sender == TyktoNft(ticketAddress).ownerOf(tokenId), "You are not the owner of this ticket"); 
         SaleItem memory saleItem = SaleItem({
             ticketId: tokenId,
@@ -68,7 +68,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         emit SaleItemCreated(ticketAddress, tokenId, amount, msg.sender);
     }
 
-    function buyTicket(address ticketAddress, uint tokenId, uint256 amount) public payable {
+    function buyTicket(address ticketAddress, uint tokenId, uint256 amount) public whenNotPaused payable {
         SaleItem[] storage saleItemList = saleItems[ticketAddress];
         SaleItem memory saleItem;
         uint256 itemIndex;

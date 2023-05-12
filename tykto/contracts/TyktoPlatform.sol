@@ -3,8 +3,10 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TyktoPlatform is ReentrancyGuard{
+contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable{
 
     using Counters for Counters.Counter;
     
@@ -28,11 +30,19 @@ contract TyktoPlatform is ReentrancyGuard{
 
     mapping(address => Event[]) public activeEvents;
 
+    function pause() public onlyOwner {
+        _pause();
+    }
 
+    function unpause() public onlyOwner {
+        _unpause();
+    }
 
     event EventCreated(address indexed ticketAddress, uint256 indexed eventId, string name, string description, string venue, uint256 startTime, uint256 endTime, address indexed creator);
 
-    function createEvent(string memory name, string memory description, string memory venue, uint256 startTime, uint256 endTime) public {
+    function createEvent(string memory name, string memory description, string memory venue, uint256 startTime, uint256 endTime) 
+    whenNotPaused
+    public {
         Event memory tyktoEvent = Event({
             id: eventCounter.current(),
             name: name,
