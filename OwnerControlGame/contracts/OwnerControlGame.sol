@@ -1,8 +1,8 @@
 pragma solidity ^0.8.4;
 
 contract OwnerControlGame{
-    address owner;
-    uint256 contractValue;
+    address public owner;
+    uint256 public contractValue;
     uint256 public previousOwnerDeposits;
     uint256 public minThresholdETH = 0.0001 ether;
     
