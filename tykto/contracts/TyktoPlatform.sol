@@ -10,6 +10,7 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private eventCounter;
+    uint256 public eventCreationFee = 0.1 ether;
 
     constructor() {
         eventCounter.increment();
@@ -55,7 +56,8 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         uint256 startTime,
         uint256 endTime,
         address eventTicketAddress
-    ) public whenNotPaused onlyOwner {
+    ) public whenNotPaused onlyOwner nonReentrant {
+        require(msg.value >= eventCreationFee, "TyktoPlatform: Insufficient fee");
         Event memory tyktoEvent = Event({
             id: eventCounter.current(),
             name: name,
@@ -81,12 +83,21 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         eventCounter.increment();
     }
 
-    function setEventInactive(uint256 eventId) public {
+    function setEventInactive(uint256 _eventId) public {
         Event[] storage events = activeEvents[msg.sender];
         for (uint256 i = 0; i < events.length; i++) {
-            if (events[i].id == eventId) {
+            if (events[i].id == _eventId) {
                 events[i].isActive = false;
             }
         }
+    }
+
+    function claimEntry() public whenNotPaused nonReentrant {
+
+    }
+
+
+function setEventCreationFee(uint256 _eventCreationFee) public onlyOwner {
+        eventCreationFee = _eventCreationFee;
     }
 }
