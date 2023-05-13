@@ -13,7 +13,12 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
 
     bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
-    enum SaleStatus{ ACTIVE, EXPIRED, CANCELLED, SOLD }
+    enum SaleStatus {
+        ACTIVE,
+        EXPIRED,
+        CANCELLED,
+        SOLD
+    }
 
     mapping(address => SaleItem[]) public saleItems;
 
@@ -35,9 +40,24 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         _grantRole(PAUSER_ROLE, msg.sender);
     }
 
-    event SaleItemCreated(address indexed ticketAddress, uint256 indexed tokenId, uint256 price, address indexed seller);
-    event SaleCancelled(address indexed ticketAddress, uint256 indexed tokenId, address indexed seller);
-    event ItemSold(address ticketAddress, uint256 indexed tokenId, uint256 price, address indexed seller, address indexed buyer);
+    event SaleItemCreated(
+        address indexed ticketAddress,
+        uint256 indexed tokenId,
+        uint256 price,
+        address indexed seller
+    );
+    event SaleCancelled(
+        address indexed ticketAddress,
+        uint256 indexed tokenId,
+        address indexed seller
+    );
+    event ItemSold(
+        address ticketAddress,
+        uint256 indexed tokenId,
+        uint256 price,
+        address indexed seller,
+        address indexed buyer
+    );
 
     function pause() public onlyRole(PAUSER_ROLE) {
         _pause();
@@ -47,14 +67,26 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         _unpause();
     }
 
-    function setFeePercentage(uint256 _feePercentage) external whenNotPaused onlyOwner {
-        require(_feePercentage <= 100, "Fee percentage cannot be more than 100");
+    function setFeePercentage(
+        uint256 _feePercentage
+    ) external whenNotPaused onlyOwner {
+        require(
+            _feePercentage <= 100,
+            "Fee percentage cannot be more than 100"
+        );
         feePercentage = _feePercentage;
     }
 
-
-    function listForSale(address ticketAddress, uint256 tokenId, uint256 amount, uint256 saleDuration) public whenNotPaused payable {
-        require(msg.sender == TyktoNft(ticketAddress).ownerOf(tokenId), "You are not the owner of this ticket"); 
+    function listForSale(
+        address ticketAddress,
+        uint256 tokenId,
+        uint256 amount,
+        uint256 saleDuration
+    ) public payable whenNotPaused {
+        require(
+            msg.sender == TyktoNft(ticketAddress).ownerOf(tokenId),
+            "You are not the owner of this ticket"
+        );
         SaleItem memory saleItem = SaleItem({
             ticketId: tokenId,
             price: amount,
@@ -68,7 +100,11 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         emit SaleItemCreated(ticketAddress, tokenId, amount, msg.sender);
     }
 
-    function buyTicket(address ticketAddress, uint tokenId, uint256 amount) public whenNotPaused payable {
+    function buyTicket(
+        address ticketAddress,
+        uint tokenId,
+        uint256 amount
+    ) public payable whenNotPaused {
         SaleItem[] storage saleItemList = saleItems[ticketAddress];
         SaleItem memory saleItem;
         uint256 itemIndex;
@@ -83,22 +119,39 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         require(saleItem.status == SaleStatus.ACTIVE, "Ticket is not for sale");
         require(saleItem.price == amount, "Ticket price is not correct");
         require(msg.value == amount, "Incorrect amount sent");
-        require(block.timestamp < saleItem.startTime + saleItem.duration, "Sale has expired");
-        require(msg.sender != saleItem.seller, "You cannot buy your own ticket");
-        require(ticket.ownerOf(tokenId) == saleItem.seller, "Seller does not own this ticket");
+        require(
+            block.timestamp < saleItem.startTime + saleItem.duration,
+            "Sale has expired"
+        );
+        require(
+            msg.sender != saleItem.seller,
+            "You cannot buy your own ticket"
+        );
+        require(
+            ticket.ownerOf(tokenId) == saleItem.seller,
+            "Seller does not own this ticket"
+        );
         saleItem.buyer = msg.sender;
         saleItem.status = SaleStatus.SOLD;
         saleItemList[itemIndex] = saleItem;
         ticket.transferFrom(saleItem.seller, msg.sender, tokenId);
 
-
-        (address creator, uint256 royaltyAmount) = ticket.royaltyInfo(tokenId, msg.value);
+        (address creator, uint256 royaltyAmount) = ticket.royaltyInfo(
+            tokenId,
+            msg.value
+        );
 
         uint256 platformFee = calculateMarketplaceFee();
         uint256 remainingAmount = msg.value - royaltyAmount - platformFee;
         payable(creator).transfer(royaltyAmount);
         payable(saleItem.seller).transfer(remainingAmount);
-        emit ItemSold(ticketAddress, tokenId, amount, saleItem.seller, msg.sender);
+        emit ItemSold(
+            ticketAddress,
+            tokenId,
+            amount,
+            saleItem.seller,
+            msg.sender
+        );
     }
 
     function cancelListing(address ticketAddress, uint256 tokenId) public {
@@ -113,7 +166,10 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
             }
         }
         require(saleItem.status == SaleStatus.ACTIVE, "Ticket is not for sale");
-        require(msg.sender == saleItem.seller, "You are not the owner of this ticket");
+        require(
+            msg.sender == saleItem.seller,
+            "You are not the owner of this ticket"
+        );
         saleItem.status = SaleStatus.CANCELLED;
         saleItemList[itemIndex] = saleItem;
         emit SaleCancelled(ticketAddress, tokenId, msg.sender);
@@ -122,7 +178,4 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
     function calculateMarketplaceFee() internal view returns (uint256) {
         return (msg.value * feePercentage) / 100;
     }
-
 }
-
-    

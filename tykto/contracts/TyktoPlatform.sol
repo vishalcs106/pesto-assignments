@@ -6,17 +6,16 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable{
-
+contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
     using Counters for Counters.Counter;
-    
+
     Counters.Counter private eventCounter;
 
     constructor() {
         eventCounter.increment();
     }
 
-    struct Event{
+    struct Event {
         uint256 id;
         string name;
         string description;
@@ -38,11 +37,25 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable{
         _unpause();
     }
 
-    event EventCreated(address indexed ticketAddress, uint256 indexed eventId, string name, string description, string venue, uint256 startTime, uint256 endTime, address indexed creator);
+    event EventCreated(
+        address indexed ticketAddress,
+        uint256 indexed eventId,
+        string name,
+        string description,
+        string venue,
+        uint256 startTime,
+        uint256 endTime,
+        address indexed creator
+    );
 
-    function createEvent(string memory name, string memory description, string memory venue, uint256 startTime, uint256 endTime) 
-    whenNotPaused
-    public {
+    function createEvent(
+        string memory name,
+        string memory description,
+        string memory venue,
+        uint256 startTime,
+        uint256 endTime,
+        address eventTicketAddress
+    ) public whenNotPaused onlyOwner {
         Event memory tyktoEvent = Event({
             id: eventCounter.current(),
             name: name,
@@ -50,13 +63,30 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable{
             venue: venue,
             startTime: startTime,
             endTime: endTime,
-            ticketAddress: address(0),
+            ticketAddress: eventTicketAddress,
             isActive: true,
             isVerified: false
         });
         activeEvents[msg.sender].push(tyktoEvent);
-        emit EventCreated(address(0), tyktoEvent.id, name, description, venue, startTime, endTime, msg.sender);
+        emit EventCreated(
+            address(0),
+            tyktoEvent.id,
+            name,
+            description,
+            venue,
+            startTime,
+            endTime,
+            msg.sender
+        );
         eventCounter.increment();
     }
 
+    function setEventInactive(uint256 eventId) public {
+        Event[] storage events = activeEvents[msg.sender];
+        for (uint256 i = 0; i < events.length; i++) {
+            if (events[i].id == eventId) {
+                events[i].isActive = false;
+            }
+        }
+    }
 }

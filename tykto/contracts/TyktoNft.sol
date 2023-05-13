@@ -13,9 +13,15 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-
-contract TyktoNft is ERC721, ERC721URIStorage, ERC2981, Pausable, Ownable, ERC721Burnable, ReentrancyGuard {
-
+contract TyktoNft is
+    ERC721,
+    ERC721URIStorage,
+    ERC2981,
+    Pausable,
+    Ownable,
+    ERC721Burnable,
+    ReentrancyGuard
+{
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
@@ -56,10 +62,7 @@ contract TyktoNft is ERC721, ERC721URIStorage, ERC2981, Pausable, Ownable, ERC72
         _unpause();
     }
 
-    function safeMint(address to, string memory uri)
-        public
-        payable
-    {
+    function safeMint(address to, string memory uri) public payable {
         require(msg.value >= mintPrice, "Not enough ETH sent; check price!");
         require(tokenIdCounter.current() < maxSupply, "Max supply reached");
         _safeMint(to, tokenIdCounter.current());
@@ -67,50 +70,45 @@ contract TyktoNft is ERC721, ERC721URIStorage, ERC2981, Pausable, Ownable, ERC72
         tokenIdCounter.increment();
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId, uint256 batchSize)
-        internal
-        whenNotPaused
-        override
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        uint256 batchSize
+    ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
     // The following functions are overrides required by Solidity.
 
-    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
         super._burn(tokenId);
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721, ERC721URIStorage)
-        returns (string memory)
-    {
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-
-    function royaltyInfo(uint256 _tokenId, uint256 _salePrice)
-        public
-        view
-        override
-        returns (address, uint256)
-    {
+    function royaltyInfo(
+        uint256 _tokenId,
+        uint256 _salePrice
+    ) public view override returns (address, uint256) {
         return (royaltyAddress, calculateRoyalty(_salePrice));
     }
 
-    function calculateRoyalty(uint256 _salePrice) view public returns (uint256) {
+    function calculateRoyalty(
+        uint256 _salePrice
+    ) public view returns (uint256) {
         return (_salePrice / 10000) * royaltyFeeInBips;
     }
 
-    function supportsInterface(bytes4 interfaceId)
-    public
-    view
-    override(ERC721, ERC2981)
-    returns (bool)
-{
-    return super.supportsInterface(interfaceId);
-}
-
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
 }
