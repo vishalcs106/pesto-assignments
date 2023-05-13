@@ -11,7 +11,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
     address public tyktoNftAddress;
     address public tyktoTokenAddress;
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     enum SaleStatus{ ACTIVE, EXPIRED, CANCELLED, SOLD }
 

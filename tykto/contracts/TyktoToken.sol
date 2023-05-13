@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Tykto is ERC20, ERC20Burnable, Pausable, AccessControl, ReentrancyGuard {
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+contract TyktoToken is ERC20, ERC20Burnable, Pausable, AccessControl, ReentrancyGuard {
+    bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     constructor() ERC20("Tykto", "Tyk") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);

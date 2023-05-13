@@ -32,6 +32,6 @@ networks: {
 
 },
   etherscan:{
-    apiKey: "MWDN7116D2SZ2KB248UJTN2974ETTHPTBM"
+    apiKey: process.env.ETHERSCAN_API_KEY
   }
 };
