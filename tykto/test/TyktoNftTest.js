@@ -51,12 +51,16 @@ describe("TyktoNft", function () {
     await tyktoNft.updateMaxSupply(1);
     const mintPrice = await tyktoNft.mintPrice();
     const tokenId = await tyktoNft.tokenIdCounter();
-    await expect(() => tyktoNft.safeMint(addr1.address, "token-uri")).to.changeEtherBalance(addr1, -mintPrice);
+    await expect(() =>
+      tyktoNft.safeMint(addr1.address, "token-uri")
+    ).to.changeEtherBalance(addr1, -mintPrice);
     expect(await tyktoNft.ownerOf(tokenId)).to.equal(addr1.address);
     expect(await tyktoNft.tokenURI(tokenId)).to.equal("token-uri");
   });
 
   it("should revert minting when ETH sent is insufficient", async function () {
-    await expect(tyktoNft.safeMint(addr1.address, "token-uri")).to.be.revertedWith("Not enough ETH sent; check price!");
+    await expect(
+      tyktoNft.safeMint(addr1.address, "token-uri")
+    ).to.be.revertedWith("Not enough ETH sent; check price!");
   });
 });

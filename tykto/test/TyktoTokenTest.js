@@ -21,9 +21,15 @@ describe("TyktoToken", function () {
   });
 
   it("should grant roles to the deployer", async function () {
-    expect(await token.hasRole(await token.DEFAULT_ADMIN_ROLE(), owner.address)).to.equal(true);
-    expect(await token.hasRole(await token.PAUSER_ROLE(), owner.address)).to.equal(true);
-    expect(await token.hasRole(await token.MINTER_ROLE(), owner.address)).to.equal(true);
+    expect(
+      await token.hasRole(await token.DEFAULT_ADMIN_ROLE(), owner.address)
+    ).to.equal(true);
+    expect(
+      await token.hasRole(await token.PAUSER_ROLE(), owner.address)
+    ).to.equal(true);
+    expect(
+      await token.hasRole(await token.MINTER_ROLE(), owner.address)
+    ).to.equal(true);
   });
 
   it("should pause and unpause the token", async function () {
@@ -45,8 +51,8 @@ describe("TyktoToken", function () {
     await token.pause();
     const amount = ethers.utils.parseEther("100");
     await token.mint(addr1, amount);
-    await expect(token.connect(addr1).transfer(addr2, amount)).to.be.revertedWith(
-      "ERC20Pausable: token transfer while paused"
-    );
+    await expect(
+      token.connect(addr1).transfer(addr2, amount)
+    ).to.be.revertedWith("ERC20Pausable: token transfer while paused");
   });
 });

@@ -3,12 +3,12 @@
 const hre = require("hardhat");
 
 async function main() {
-    const TyktoToken = await hre.ethers.getContractFactory("TyktoToken");
-    const tyktoToken = await TyktoToken.deploy();
-    
-    await tyktoToken.deployed();
-    
-    console.log("TyktoToken deployed to:", tyktoToken.address);
+  const TyktoToken = await hre.ethers.getContractFactory("TyktoToken");
+  const tyktoToken = await TyktoToken.deploy();
+
+  await tyktoToken.deployed();
+
+  console.log("TyktoToken deployed to:", tyktoToken.address);
 }
 
 main()
