@@ -7,6 +7,11 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "./TyktoNft.sol";
 
+/*
+* @author Vishal
+* @notice Marketplace for TyktoNFT. Can be listed for sale and bought.
+*/
+
 contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
     address public tyktoNftAddress;
     address public tyktoTokenAddress;

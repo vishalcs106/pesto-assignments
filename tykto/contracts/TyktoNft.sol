@@ -13,6 +13,11 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
+/*
+* @author Vishal
+* @notice ERC721 token for Tykto. These are the NFTS can be minted and burned to claim entry to the Tykto Events.
+*/
+
 contract TyktoNft is
     ERC721,
     ERC721URIStorage,

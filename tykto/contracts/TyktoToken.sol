@@ -7,6 +7,11 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+/*
+* @author Vishal
+* @notice ERC20 token for Tykto, can be earned by burning TyktoNFT
+*/
+
 contract TyktoToken is
     ERC20,
     ERC20Burnable,

@@ -5,15 +5,25 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./TyktoToken.sol";
+
+/*
+* @author Vishal
+* @notice Smartcontarct to create Tykto Events and provide entry to the event by burning TyktoNFT
+*/
 
 contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private eventCounter;
     uint256 public eventCreationFee = 0.1 ether;
+    TyktoToken public tyktoToken;
+    address public tyktoTokenAddress;
 
-    constructor() {
+    constructor(address _tyktoTokenAddress) {
         eventCounter.increment();
+        tyktoTokenAddress = _tyktoTokenAddress;
+        tyktoToken = TyktoToken(_tyktoTokenAddress);
     }
 
     struct Event {
@@ -71,7 +81,7 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         });
         activeEvents[msg.sender].push(tyktoEvent);
         emit EventCreated(
-            address(0),
+            eventTicketAddress,
             tyktoEvent.id,
             name,
             description,
@@ -92,8 +102,21 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         }
     }
 
-    function claimEntry() public whenNotPaused nonReentrant {
+    function setTyktoTokenAddress(address _tyktoTokenAddress) public onlyOwner {
+        tyktoTokenAddress = _tyktoTokenAddress;
+    }
 
+    function claimEntry(uint256 eventId, uint256 tokenId) public whenNotPaused nonReentrant {
+        Event[] storage events = activeEvents[msg.sender];
+        for (uint256 i = 0; i < events.length; i++) {
+            if (events[i].id == eventId) {
+                TyktoNft ticket = TyktoNft(events[i].ticketAddress);
+                require(ticket.balanceOf(msg.sender) > 0, "TyktoPlatform: You do not own this ticket");
+                ticket.burn(msg.sender, address(this), tokenId);
+                tyktoToken.transfer(msg.sender, 100);
+                break;
+            }
+        }
     }
 
 
