@@ -132,8 +132,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         }
         TyktoNft ticket = TyktoNft(ticketAddress);
         require(saleItem.status == SaleStatus.ACTIVE, "Ticket is not for sale");
-        require(saleItem.price == amount, "Ticket price is not correct");
-        require(msg.value == amount, "Incorrect amount sent");
+        require(msg.value == saleItem.price, "Incorrect amount sent");
         require(
             block.timestamp < saleItem.startTime + saleItem.duration,
             "Sale has expired"
