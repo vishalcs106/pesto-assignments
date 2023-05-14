@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./TyktoToken.sol";
+import "./TyktoNft.sol";
 
 /*
  * @author Vishal
@@ -76,7 +77,7 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         uint256 startTime,
         uint256 endTime,
         address eventTicketAddress
-    ) external whenNotPaused nonReentrant {
+    ) external payable whenNotPaused nonReentrant {
         require(
             msg.value >= eventCreationFee,
             "TyktoPlatform: Insufficient fee"
@@ -138,7 +139,7 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
                     ticket.balanceOf(msg.sender) > 0,
                     "TyktoPlatform: You do not own this ticket"
                 );
-                ticket.burn(msg.sender, address(this), tokenId);
+                ticket.burn(tokenId);
                 tyktoToken.transfer(msg.sender, 100);
                 break;
             }

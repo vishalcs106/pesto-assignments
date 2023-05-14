@@ -34,13 +34,17 @@ contract TyktoNft is
 
     uint public mintPrice = 0.1 ether;
     uint public maxSupply;
-    uint public baseUri;
 
     uint public royaltyFeeInBips = 500;
     address royaltyAddress;
+    string public ticketURI;
 
     constructor() ERC721("TyktoNft", "TykNft") {
         royaltyAddress = msg.sender;
+    }
+
+    function setMaxSupply(uint256 _maxSupply) public onlyOwner {
+        maxSupply = _maxSupply;
     }
 
     function updateMintPrice(uint256 newMintPrice) public onlyOwner {
@@ -49,10 +53,6 @@ contract TyktoNft is
 
     function updateMaxSupply(uint256 newMaxSupply) public onlyOwner {
         maxSupply = newMaxSupply;
-    }
-
-    function updateBaseUri(uint256 newBaseUri) public onlyOwner {
-        baseUri = newBaseUri;
     }
 
     function updateRoyaltyAddress(address newRoyaltyAddress) public onlyOwner {
@@ -67,13 +67,16 @@ contract TyktoNft is
         _unpause();
     }
 
+    function setTokenURI(string memory _tokenURI) public onlyOwner {
+        ticketURI = _tokenURI;
+    }
 
     //@notice Mint a new NFT
-    function safeMint(address to, string memory uri) external payable {
+    function safeMint(address to) external payable {
         require(msg.value >= mintPrice, "Not enough ETH sent; check price!");
         require(tokenIdCounter.current() < maxSupply, "Max supply reached");
         _safeMint(to, tokenIdCounter.current());
-        _setTokenURI(tokenIdCounter.current(), uri);
+        _setTokenURI(tokenIdCounter.current(), ticketURI);
         tokenIdCounter.increment();
     }
 
@@ -119,5 +122,11 @@ contract TyktoNft is
         bytes4 interfaceId
     ) public view override(ERC721, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    //@notice Withdraw ETH from the contract
+    function withdraw() public onlyOwner {
+        uint balance = address(this).balance;
+        payable(msg.sender).transfer(balance);
     }
 }
