@@ -162,7 +162,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         emit ItemSold(
             ticketAddress,
             tokenId,
-            amount,
+            saleItem.price,
             saleItem.seller,
             msg.sender
         );
