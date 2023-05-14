@@ -8,9 +8,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./TyktoToken.sol";
 
 /*
-* @author Vishal
-* @notice Smartcontarct to create Tykto Events and provide entry to the event by burning TyktoNFT
-*/
+ * @author Vishal
+ * @notice Smartcontarct to create Tykto Events and provide entry to the event by burning TyktoNFT
+ */
 
 contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
     using Counters for Counters.Counter;
@@ -20,6 +20,8 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
     TyktoToken public tyktoToken;
     address public tyktoTokenAddress;
 
+    //@notice Constructor
+    //@param _tyktoTokenAddress Address of TyktoToken
     constructor(address _tyktoTokenAddress) {
         eventCounter.increment();
         tyktoTokenAddress = _tyktoTokenAddress;
@@ -36,6 +38,7 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         address ticketAddress;
         bool isActive;
         bool isVerified;
+        address owner;
     }
 
     mapping(address => Event[]) public activeEvents;
@@ -59,6 +62,13 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         address indexed creator
     );
 
+    //@notice Create a new event
+    //@param name Name of the event
+    //@param description Description of the event
+    //@param venue Venue of the event
+    //@param startTime Start time of the event
+    //@param endTime End time of the event
+    //@param eventTicketAddress Address of the TyktoNFT
     function createEvent(
         string memory name,
         string memory description,
@@ -66,8 +76,11 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         uint256 startTime,
         uint256 endTime,
         address eventTicketAddress
-    ) public whenNotPaused onlyOwner nonReentrant {
-        require(msg.value >= eventCreationFee, "TyktoPlatform: Insufficient fee");
+    ) external whenNotPaused nonReentrant {
+        require(
+            msg.value >= eventCreationFee,
+            "TyktoPlatform: Insufficient fee"
+        );
         Event memory tyktoEvent = Event({
             id: eventCounter.current(),
             name: name,
@@ -77,7 +90,8 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
             endTime: endTime,
             ticketAddress: eventTicketAddress,
             isActive: true,
-            isVerified: false
+            isVerified: false,
+            owner: msg.sender
         });
         activeEvents[msg.sender].push(tyktoEvent);
         emit EventCreated(
@@ -93,25 +107,37 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         eventCounter.increment();
     }
 
+    //notice Set event as inactive
     function setEventInactive(uint256 _eventId) public {
         Event[] storage events = activeEvents[msg.sender];
         for (uint256 i = 0; i < events.length; i++) {
             if (events[i].id == _eventId) {
+                require(events[i].owner == msg.sender, "TyktoPlatform: You are not the owner of this event");
                 events[i].isActive = false;
             }
         }
     }
 
+    //@notice Set TyktoToken address
     function setTyktoTokenAddress(address _tyktoTokenAddress) public onlyOwner {
         tyktoTokenAddress = _tyktoTokenAddress;
     }
 
-    function claimEntry(uint256 eventId, uint256 tokenId) public whenNotPaused nonReentrant {
+    //@notice Claim entry to the event
+    //@param eventId Id of the event
+    //@param tokenId Id of the TyktoNFT
+    function claimEntry(
+        uint256 eventId,
+        uint256 tokenId
+    ) public whenNotPaused nonReentrant {
         Event[] storage events = activeEvents[msg.sender];
         for (uint256 i = 0; i < events.length; i++) {
             if (events[i].id == eventId) {
                 TyktoNft ticket = TyktoNft(events[i].ticketAddress);
-                require(ticket.balanceOf(msg.sender) > 0, "TyktoPlatform: You do not own this ticket");
+                require(
+                    ticket.balanceOf(msg.sender) > 0,
+                    "TyktoPlatform: You do not own this ticket"
+                );
                 ticket.burn(msg.sender, address(this), tokenId);
                 tyktoToken.transfer(msg.sender, 100);
                 break;
@@ -119,8 +145,24 @@ contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
         }
     }
 
-
-function setEventCreationFee(uint256 _eventCreationFee) public onlyOwner {
+    //@notice Set event creation fee
+    function setEventCreationFee(uint256 _eventCreationFee) public onlyOwner {
         eventCreationFee = _eventCreationFee;
     }
+
+    //@notice Verify event
+    function verifyEvent(uint256 _eventId) public onlyOwner {
+        Event[] storage events = activeEvents[msg.sender];
+        for (uint256 i = 0; i < events.length; i++) {
+            if (events[i].id == _eventId) {
+                events[i].isVerified = true;
+            }
+        }
+    }
+
+    //@notice Withdraw funds from the contract
+    function withdraw() public onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
 }

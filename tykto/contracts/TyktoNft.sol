@@ -67,7 +67,9 @@ contract TyktoNft is
         _unpause();
     }
 
-    function safeMint(address to, string memory uri) public payable {
+
+    //@notice Mint a new NFT
+    function safeMint(address to, string memory uri) external payable {
         require(msg.value >= mintPrice, "Not enough ETH sent; check price!");
         require(tokenIdCounter.current() < maxSupply, "Max supply reached");
         _safeMint(to, tokenIdCounter.current());
@@ -98,6 +100,7 @@ contract TyktoNft is
         return super.tokenURI(tokenId);
     }
 
+    //@notice Get royalty info for a given token. Will be used my marketplaces to calculate royalty fee
     function royaltyInfo(
         uint256 _tokenId,
         uint256 _salePrice
@@ -105,6 +108,7 @@ contract TyktoNft is
         return (royaltyAddress, calculateRoyalty(_salePrice));
     }
 
+    //@notice Calculate royalty fee for a given sale price
     function calculateRoyalty(
         uint256 _salePrice
     ) public view returns (uint256) {

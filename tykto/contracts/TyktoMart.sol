@@ -13,20 +13,25 @@ import "./TyktoNft.sol";
 */
 
 contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
+    //@notice NFT contract address
     address public tyktoNftAddress;
+    
+    //@notice Token contract address
     address public tyktoTokenAddress;
 
     bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
+    //@notice Sale status of a ticket
     enum SaleStatus {
         ACTIVE,
-        EXPIRED,
         CANCELLED,
         SOLD
     }
 
+    //@notice Mapping for tickets listed for sale
     mapping(address => SaleItem[]) public saleItems;
 
+    //@notice Fee percentage charged by the marketplace
     uint256 public feePercentage = 5;
 
     struct SaleItem {
@@ -39,6 +44,9 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         SaleStatus status;
     }
 
+    //@notice Constructor 
+    //@param _tyktoNftAddress Address of TyktoNFT contract
+    //@param _tyktoTokenAddress Address of TyktoToken contract
     constructor(address _tyktoNftAddress, address _tyktoTokenAddress) {
         tyktoNftAddress = _tyktoNftAddress;
         tyktoTokenAddress = _tyktoTokenAddress;
@@ -72,6 +80,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         _unpause();
     }
 
+    //@notice Change the fee percentage charged by the marketplace
     function setFeePercentage(
         uint256 _feePercentage
     ) external whenNotPaused onlyOwner {
@@ -82,12 +91,13 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         feePercentage = _feePercentage;
     }
 
+    //@notice List a ticket for sale
     function listForSale(
         address ticketAddress,
         uint256 tokenId,
         uint256 amount,
         uint256 saleDuration
-    ) public payable whenNotPaused {
+    ) external payable whenNotPaused {
         require(
             msg.sender == TyktoNft(ticketAddress).ownerOf(tokenId),
             "You are not the owner of this ticket"
@@ -105,11 +115,12 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         emit SaleItemCreated(ticketAddress, tokenId, amount, msg.sender);
     }
 
+    //@notice Buy a ticket listed from sale
     function buyTicket(
         address ticketAddress,
         uint tokenId,
         uint256 amount
-    ) public payable whenNotPaused {
+    ) external payable whenNotPaused {
         SaleItem[] storage saleItemList = saleItems[ticketAddress];
         SaleItem memory saleItem;
         uint256 itemIndex;
@@ -159,6 +170,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         );
     }
 
+    //@notice Cancel a ticket listed for sale
     function cancelListing(address ticketAddress, uint256 tokenId) public {
         SaleItem[] storage saleItemList = saleItems[ticketAddress];
         SaleItem memory saleItem;
@@ -180,7 +192,14 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         emit SaleCancelled(ticketAddress, tokenId, msg.sender);
     }
 
+    //@notice Calculates the marketplace fee
     function calculateMarketplaceFee() internal view returns (uint256) {
         return (msg.value * feePercentage) / 100;
     }
+
+    //@notice Withdraws the balance from the contract
+    function withdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
 }
