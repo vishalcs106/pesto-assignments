@@ -3,8 +3,8 @@
 const hre = require("hardhat");
 
 async function main() {
-  const tyktoNftAddress = "0x1f4a122641A38EBeeb78d5A205A6acec9E678E27";
-  const tyktoTokenAddress = "0xf03C02d3262E1F06525a5f6Bd7C9f1D367fE00F2";
+  const tyktoNftAddress = "0x6eE5fd6FB00dE90944c4734FA986Ecc6bf142969";
+  const tyktoTokenAddress = "0x4Df3F8F71e1aB54524BFd223024680867D432acb";
   const TyktoMart = await hre.ethers.getContractFactory("TyktoMart");
   const tyktoMart = await TyktoMart.deploy(tyktoNftAddress, tyktoTokenAddress);
 

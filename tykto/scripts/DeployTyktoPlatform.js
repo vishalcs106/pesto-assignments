@@ -4,7 +4,7 @@ const hre = require("hardhat");
 
 async function main() {
   const TyktoPlatform = await hre.ethers.getContractFactory("TyktoPlatform");
-  const tyktoTokenAddress = "0xf03C02d3262E1F06525a5f6Bd7C9f1D367fE00F2";
+  const tyktoTokenAddress = "0x4Df3F8F71e1aB54524BFd223024680867D432acb";
   const tyktoPlatform = await TyktoPlatform.deploy(tyktoTokenAddress);
 
   await tyktoPlatform.deployed();
