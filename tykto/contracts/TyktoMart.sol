@@ -97,7 +97,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         uint256 tokenId,
         uint256 amount,
         uint256 saleDuration
-    ) external payable whenNotPaused {
+    ) external whenNotPaused {
         require(
             msg.sender == TyktoNft(ticketAddress).ownerOf(tokenId),
             "You are not the owner of this ticket"
@@ -118,8 +118,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
     //@notice Buy a ticket listed from sale
     function buyTicket(
         address ticketAddress,
-        uint tokenId,
-        uint256 amount
+        uint tokenId
     ) external payable whenNotPaused {
         SaleItem[] storage saleItemList = saleItems[ticketAddress];
         SaleItem memory saleItem;
