@@ -23,6 +23,11 @@ solidity: "0.8.9",
 defaultNetwork: "fuji",
 networks: {
   hardhat: {
+    forking: {
+      enabled: true,
+      url : process.env.INFURA_URL
+    },
+    chainId: 43114,
   },
   fuji: {
     url: 'https://api.avax-test.network/ext/bc/C/rpc',
