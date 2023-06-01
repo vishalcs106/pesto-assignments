@@ -13,7 +13,7 @@ import "./TyktoNft.sol";
  * @notice Smartcontarct to create Tykto Events and provide entry to the event by burning TyktoNFT
  */
 
-contract TyktoPlatform is ReentrancyGuard, Pausable, Ownable {
+contract EventFactory is ReentrancyGuard, Pausable, Ownable {
     using Counters for Counters.Counter;
 
     Counters.Counter private eventCounter;
