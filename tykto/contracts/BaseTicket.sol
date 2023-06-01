@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 * @notice ERC721 token for Tykto. These are the NFTS can be minted and burned to claim entry to the Tykto Events.
 */
 
-contract TyktoNft is
+contract BaseTicket is
     ERC721,
     ERC721URIStorage,
     ERC2981,
@@ -32,14 +32,15 @@ contract TyktoNft is
 
     Counters.Counter private tokenIdCounter;
 
-    uint public mintPrice = 0.1 ether;
+    uint public mintPrice;
     uint public maxSupply;
 
     uint public royaltyFeeInBips = 500;
     address royaltyAddress;
     string public ticketURI;
 
-    constructor() ERC721("TyktoNft", "TykNft") {
+    constructor(string memory _name, string memory _symbol, uint256 _mintPrice) ERC721(_name, _symbol) {
+        mintPrice = _mintPrice;
         royaltyAddress = msg.sender;
     }
 
