@@ -2,31 +2,33 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "./TyktoToken.sol";
-import "./TyktoNft.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "./Tyk.sol";
+import "./BaseTicket.sol";
 
 /*
  * @author Vishal
  * @notice Smartcontarct to create Tykto Events and provide entry to the event by burning TyktoNFT
  */
 
-contract EventFactory is ReentrancyGuard, Pausable, Ownable {
+contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgradeable, OwnableUpgradeable  {
     using Counters for Counters.Counter;
 
     Counters.Counter private eventCounter;
-    uint256 public eventCreationFee = 0.1 ether;
-    TyktoToken public tyktoToken;
+    uint256 public eventCreationFee;
+    Tyk public tyktoToken;
     address public tyktoTokenAddress;
 
     //@notice Constructor
     //@param _tyktoTokenAddress Address of TyktoToken
-    constructor(address _tyktoTokenAddress) {
+    function initialize(address _tyktoTokenAddress) public initializer {
         eventCounter.increment();
         tyktoTokenAddress = _tyktoTokenAddress;
-        tyktoToken = TyktoToken(_tyktoTokenAddress);
+        tyktoToken = Tyk(_tyktoTokenAddress);
+        eventCreationFee = 0.1 ether;
     }
 
     struct Event {
@@ -134,7 +136,7 @@ contract EventFactory is ReentrancyGuard, Pausable, Ownable {
         Event[] storage events = activeEvents[msg.sender];
         for (uint256 i = 0; i < events.length; i++) {
             if (events[i].id == eventId) {
-                TyktoNft ticket = TyktoNft(events[i].ticketAddress);
+                BaseTicket ticket = BaseTicket(events[i].ticketAddress);
                 require(
                     ticket.balanceOf(msg.sender) > 0,
                     "TyktoPlatform: You do not own this ticket"

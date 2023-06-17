@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "./TyktoNft.sol";
+import "./BaseTicket.sol";
 
 /*
 * @author Vishal
 * @notice Marketplace for TyktoNFT. Can be listed for sale and bought.
 */
 
-contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
+contract TyktoMart is Initializable, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable  {
     //@notice NFT contract address
     address public tyktoNftAddress;
     
     //@notice Token contract address
     address public tyktoTokenAddress;
 
-    bytes32 private constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     //@notice Sale status of a ticket
     enum SaleStatus {
@@ -32,7 +32,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
     mapping(address => SaleItem[]) public saleItems;
 
     //@notice Fee percentage charged by the marketplace
-    uint256 public feePercentage = 5;
+    uint256 public feePercentage;
 
     struct SaleItem {
         uint256 ticketId;
@@ -47,10 +47,10 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
     //@notice Constructor 
     //@param _tyktoNftAddress Address of TyktoNFT contract
     //@param _tyktoTokenAddress Address of TyktoToken contract
-    constructor(address _tyktoNftAddress, address _tyktoTokenAddress) {
+    function initialize(address _tyktoNftAddress, address _tyktoTokenAddress) public initializer {
         tyktoNftAddress = _tyktoNftAddress;
         tyktoTokenAddress = _tyktoTokenAddress;
-        _grantRole(PAUSER_ROLE, msg.sender);
+        feePercentage = 5;
     }
 
     event SaleItemCreated(
@@ -72,11 +72,11 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         address indexed buyer
     );
 
-    function pause() public onlyRole(PAUSER_ROLE) {
+    function pause() public onlyOwner() {
         _pause();
     }
 
-    function unpause() public onlyRole(PAUSER_ROLE) {
+    function unpause() public onlyOwner(){
         _unpause();
     }
 
@@ -99,7 +99,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
         uint256 saleDuration
     ) external whenNotPaused {
         require(
-            msg.sender == TyktoNft(ticketAddress).ownerOf(tokenId),
+            msg.sender == BaseTicket(ticketAddress).ownerOf(tokenId),
             "You are not the owner of this ticket"
         );
         SaleItem memory saleItem = SaleItem({
@@ -130,7 +130,7 @@ contract TyktoMart is Ownable, AccessControl, Pausable, ReentrancyGuard {
                 break;
             }
         }
-        TyktoNft ticket = TyktoNft(ticketAddress);
+        BaseTicket ticket = BaseTicket(ticketAddress);
         require(saleItem.status == SaleStatus.ACTIVE, "Ticket is not for sale");
         require(msg.value == saleItem.price, "Incorrect amount sent");
         require(
