@@ -29,16 +29,21 @@ networks: {
       enabled: true,
       url : process.env.INFURA_URL
     },
-    chainId: 43114,
+    chainId: 137
   },
   fuji: {
     url: 'https://api.avax-test.network/ext/bc/C/rpc',
     chainId: 43113,
     accounts: [process.env.PRIVATE]
+  },
+  mumbai: {
+    url: 'https://matic-mumbai.chainstacklabs.com',
+    chainId: 80001,
+    accounts: [process.env.PRIVATE]
   }
 
 },
   etherscan:{
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: process.env.POLYGONSCAN_API_KEY
   }
 };

@@ -44,7 +44,7 @@ const Button: React.FC<ButtonProp> = ({
 const useStyles = makeStyles((theme: any) => ({
   btn: {
     width: "max-content",
-    background: "#21325E",
+    background: "#5f27cd",
     position: "relative",
     cursor: "pointer",
     borderRadius: 5,

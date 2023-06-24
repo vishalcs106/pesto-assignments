@@ -13,7 +13,7 @@ const Navigation = ({ account, setAccount }) => {
         <a href="/"><h1>Tykto</h1></a>
 
         <ul className='nav__links'>
-          <li><a href="/createEvent">Create Event</a></li>
+          <li><a href="/create">Create Event</a></li>
           <li><a href="/marketplace">Marketplace</a></li>
           <li><a href="/swapToken">Swap Tykto</a></li>
           <li><a href="/myTickets">My Tickets</a></li>

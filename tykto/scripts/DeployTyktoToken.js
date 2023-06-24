@@ -3,7 +3,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const TyktoToken = await hre.ethers.getContractFactory("TyktoToken");
+  const TyktoToken = await hre.ethers.getContractFactory("Tyk");
   const tyktoToken = await TyktoToken.deploy();
 
   await tyktoToken.deployed();

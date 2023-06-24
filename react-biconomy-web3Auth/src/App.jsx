@@ -1,73 +1,97 @@
-import React from "react";
+import React from "react"
+import { useSmartAccountContext } from "./contexts/SmartAccountContext"
+import { useWeb3AuthContext } from "./contexts/SocialLoginContext"
 import { makeStyles } from "@material-ui/core/styles";
-import { useSmartAccountContext } from "./contexts/SmartAccountContext";
-import { useWeb3AuthContext } from "./contexts/SocialLoginContext";
-import Button from "./components/Button";
-import Navigation from "./components/Navigation";
-import Home from "./pages/Home";
-import Marketplace from "./pages/Marketplace";
-import CreateEvent from "./pages/CreateEvent";
-import MyTickets from "./pages/MyTickets";
-import SwapTokens from "./pages/SwapTokens";
+import Button from "./components/Button"
+import Navigation from "./components/Navigation"
+import Home from "./pages/Home"
+import Marketplace from "./pages/Marketplace"
+import CreateEvent from "./pages/CreateEvent"
+import MyTickets from "./pages/MyTickets"
+import SwapTokens from "./pages/SwapTokens"
 
-const App: React.FC = () => {
-  const classes = useStyles();
+const App = () => {
+  const classes = useStyles()
+  let pageComponent
+  switch (window.location.pathname) {
+    case "/": <Home/>
+      break;
+      case "/": <CreateEvent/>
+      break;
+      case "/": <a/>
+      break;
+      case "/": <Home/>
+      break;
+  
+    default:
+      break;
+  }
+  switch (key) {
+    case value:
+      
+      break;
+  
+    default:
+      break;
+  }
   const {
     address,
     loading: eoaLoading,
     userInfo,
+    provider,
     connect,
     disconnect,
-    getUserInfo,
-  } = useWeb3AuthContext();
+    getUserInfo
+  } = useWeb3AuthContext()
   const {
     selectedAccount,
     loading: scwLoading,
-    setSelectedAccount,
-  } = useSmartAccountContext();
+    setSelectedAccount
+  } = useSmartAccountContext()
 
-  console.log("address", address);
+  console.log("address app", address)
 
-  let component;
-  console.log("window.location.pathname", window.location.pathname);
+  let component
+  console.log("window.location.pathname", window.location.pathname)
+
   switch (window.location.pathname) {
     case "/":
-      component = <Home />;
-      break;
+      
+      component = <Home />
+      break
 
     case "/marketplace":
-      component = <Marketplace />;
-      break;
+      component = <Marketplace />
+      break
 
-    case "/createEvent":
-      component = <CreateEvent />;
-      break;
+    case "/create":
+      component = <CreateEvent/>
+      break
 
     case "/myTickets":
-      component = <MyTickets />;
-      break;
+      component = <MyTickets />
+      break
 
     case "/swapToken":
-      component = <SwapTokens />;
-      break;
+      component = <SwapTokens />
+      break
 
     default:
-      break;
+      break
   }
 
   return (
     <div className={classes.bgCover}>
-  
       <Navigation account={selectedAccount} setAccount={setSelectedAccount} />
-      
+
       <main className={classes.container}>
         <Button
           onClickFunc={
             !address
               ? connect
               : () => {
-                  setSelectedAccount(null);
-                  disconnect();
+                  setSelectedAccount(null)
+                  disconnect()
                 }
           }
           title={!address ? "Connect Wallet" : "Disconnect Wallet"}
@@ -88,16 +112,12 @@ const App: React.FC = () => {
             <p>{selectedAccount.smartAccountAddress}</p>
           </div>
         )}
-        
       </main>
 
-      <div style={{justifyItems:"center"}}>{component}</div>  
-      
+      <div style={{ justifyItems: "center", padding: "80px" }}>{component}</div>
     </div>
-    
-    
-  );
-};
+  )
+}
 
 const useStyles = makeStyles(() => ({
   bgCover: {
@@ -107,6 +127,7 @@ const useStyles = makeStyles(() => ({
     minHeight: "100vh",
     color: "#fff",
     fontStyle: "italic",
+    paddingBottom:"120px"
   },
   container: {
     display: "flex",

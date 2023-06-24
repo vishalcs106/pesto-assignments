@@ -1,4 +1,6 @@
-export default function Home(){
+export default function Home(props){
+
+    console.log(props)
 
 
     const containerStyles = {

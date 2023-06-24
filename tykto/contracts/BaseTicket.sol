@@ -39,9 +39,14 @@ contract BaseTicket is
     address royaltyAddress;
     string public ticketURI;
 
-    constructor(string memory _name, string memory _symbol, uint256 _mintPrice) ERC721(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, uint256 _mintPrice, 
+    uint256 _maxSupply, uint _royaltyFeeInBips, address _royaltyAddress, string memory _tokenUri) ERC721(_name, _symbol) {
         mintPrice = _mintPrice;
         royaltyAddress = msg.sender;
+        maxSupply = _maxSupply;
+        royaltyAddress = _royaltyAddress;
+        royaltyFeeInBips = _royaltyFeeInBips;
+        ticketURI = _tokenUri;
     }
 
     function setMaxSupply(uint256 _maxSupply) public onlyOwner {

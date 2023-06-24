@@ -43,6 +43,11 @@ contract BaseSbt is
         ticketURI = _tokenURI;
     }
 
+    function safeMint(address mintTo) public{
+        _safeMint(mintTo, tokenIdCounter.current());
+        tokenIdCounter.increment();
+    }
+
     function tokenURI(
         uint256 tokenId
     ) public view override(ERC721, ERC721URIStorage) returns (string memory) {

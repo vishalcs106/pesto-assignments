@@ -6,8 +6,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./Tyk.sol";
 import "./BaseTicket.sol";
+import "./BaseSbt.sol";
 
 /*
  * @author Vishal
@@ -22,6 +25,11 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
     Tyk public tyktoToken;
     address public tyktoTokenAddress;
 
+    ISwapRouter public swapRouter;
+
+    address public constant WETH9 = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889;
+
+
     //@notice Constructor
     //@param _tyktoTokenAddress Address of TyktoToken
     function initialize(address _tyktoTokenAddress) public initializer {
@@ -29,6 +37,7 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
         tyktoTokenAddress = _tyktoTokenAddress;
         tyktoToken = Tyk(_tyktoTokenAddress);
         eventCreationFee = 0.1 ether;
+        swapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
     }
 
     struct Event {
@@ -39,6 +48,7 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
         uint256 startTime;
         uint256 endTime;
         address ticketAddress;
+        address sbtAddress;
         bool isActive;
         bool isVerified;
         address owner;
@@ -78,7 +88,8 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
         string memory venue,
         uint256 startTime,
         uint256 endTime,
-        address eventTicketAddress
+        address eventTicketAddress,
+        address sbtAddress
     ) external payable whenNotPaused nonReentrant {
         require(
             msg.value >= eventCreationFee,
@@ -92,11 +103,15 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
             startTime: startTime,
             endTime: endTime,
             ticketAddress: eventTicketAddress,
+            sbtAddress: sbtAddress,
             isActive: true,
             isVerified: false,
             owner: msg.sender
         });
         activeEvents[msg.sender].push(tyktoEvent);
+
+        swapExactInputSingle(msg.value);
+
         emit EventCreated(
             eventTicketAddress,
             tyktoEvent.id,
@@ -137,11 +152,13 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
         for (uint256 i = 0; i < events.length; i++) {
             if (events[i].id == eventId) {
                 BaseTicket ticket = BaseTicket(events[i].ticketAddress);
+                BaseSbt sbt = BaseSbt(events[i].sbtAddress);
                 require(
                     ticket.balanceOf(msg.sender) > 0,
                     "TyktoPlatform: You do not own this ticket"
                 );
                 ticket.burn(tokenId);
+                sbt.safeMint(msg.sender);
                 tyktoToken.transfer(msg.sender, 100);
                 break;
             }
@@ -166,6 +183,33 @@ contract EventFactory is Initializable, ReentrancyGuardUpgradeable, PausableUpgr
     //@notice Withdraw funds from the contract
     function withdraw() public onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function swapExactInputSingle(uint amountIn)
+        private
+        returns (uint amountOut)
+    {
+
+        TransferHelper.safeTransferFrom(
+            WETH9,  
+            msg.sender,
+            address(this),
+            amountIn
+        );
+        TransferHelper.safeApprove(WETH9, address(swapRouter), amountIn);
+
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter
+        .ExactInputSingleParams({
+            tokenIn: WETH9,
+            tokenOut: tyktoTokenAddress,
+            fee: 3000,
+            recipient: address(this),
+            deadline: block.timestamp,
+            amountIn: amountIn,
+            amountOutMinimum: 0,
+            sqrtPriceLimitX96: 0
+        });
+        amountOut = swapRouter.exactInputSingle(params);
     }
 
 }
